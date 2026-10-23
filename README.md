@@ -148,8 +148,48 @@ PC를 켜서 **입실이 끝나면**, [GitHub Releases](https://github.com/seoph
 - 입실을 먼저 처리하므로 업데이트 때문에 입실이 늦어지지 않습니다.
 - 업데이트에 실패해도(인터넷 문제 등) 입실/퇴실에는 영향이 없고, 다음 부팅 때 다시 시도합니다.
 - 업데이트되는 것은 `autocheck.exe`뿐입니다. 계정 정보(`.env`)와 작업 스케줄러 설정은 그대로 유지됩니다.
-- 지금 바로 업데이트를 확인하려면 `autocheck.exe update`를 실행하세요. ([직접 실행하기](#직접-실행하기-테스트용) 참고)
-- 현재 버전과 업데이트 기록은 `autocheck.log`에서 볼 수 있습니다. (`autocheck v1.0.0 실행: in`, `업데이트 완료: v1.1.0`)
+
+### 업데이트 확인하기
+
+#### 1. 지금 설치된 버전 보기
+
+`autocheck.log`의 **마지막 `autocheck vX.Y.Z 실행` 줄**이 현재 버전입니다.
+
+- **메모장으로 보기**: `Win + R` → `%LOCALAPPDATA%\SsafyAutoCheckin\autocheck.log` 입력 → 엔터 → 맨 아래로 이동
+- **명령어로 보기** (PowerShell):
+  ```
+  Get-Content "$env:LOCALAPPDATA\SsafyAutoCheckin\autocheck.log" -Encoding utf8 -Tail 5
+  ```
+
+```
+[2026-10-24 08:31:02] autocheck v1.0.0 실행: in      ← 현재 버전 v1.0.0
+```
+
+> 업데이트는 **다음 실행부터** 적용됩니다. `업데이트 완료: v1.1.0`이 찍힌 직후에는 아직 `v1.0.0 실행`으로 보이고, 그다음 실행부터 `v1.1.0 실행`으로 바뀝니다.
+
+#### 2. 최신 버전 보기
+
+[Releases 페이지](https://github.com/seophohoho/autocheckinout/releases/latest) 맨 위의 태그(예: `v1.1.0`)가 최신 버전입니다. 1번의 버전과 같으면 최신 상태입니다.
+
+#### 3. 지금 바로 업데이트하기
+
+부팅을 기다리지 않고 바로 확인/업데이트하려면 명령 프롬프트(`Win + R` → `cmd`)에서 실행합니다.
+
+```
+%LOCALAPPDATA%\SsafyAutoCheckin\autocheck.exe update
+```
+
+창 없이 몇 초 만에 끝납니다. 결과는 `autocheck.log` 맨 아래에 남습니다.
+
+| 로그 메시지 | 뜻 |
+|---|---|
+| `업데이트: 최신 버전 사용 중 (v1.0.0)` | 이미 최신 버전입니다. |
+| `업데이트: v1.0.0 → v1.1.0 다운로드 중` → `업데이트 완료: v1.1.0` | 새 버전으로 교체했습니다. 다음 실행부터 적용됩니다. |
+| `업데이트: 아직 배포된 릴리스가 없음` | 저장소에 Release가 하나도 없습니다. |
+| `업데이트 실패 (다음 부팅 때 다시 시도): ...` | 인터넷 문제 등으로 실패했습니다. 입실/퇴실에는 영향이 없습니다. |
+| `업데이트 확인 건너뜀 (설치 폴더의 exe로 실행한 경우에만 업데이트)` | `dist` 폴더 등 설치 폴더가 아닌 곳의 exe를 실행했습니다. 위 명령처럼 설치 폴더의 exe를 실행하세요. |
+
+> **로그에 버전 줄(`autocheck vX.Y.Z 실행`)이 아예 없다면** 업데이트 기능이 없는 예전 버전이 설치된 것입니다. 이 경우 [Releases](https://github.com/seophohoho/autocheckinout/releases/latest)에서 zip을 받아 `install.exe`를 한 번 다시 실행하세요. 그 뒤로는 자동으로 업데이트됩니다.
 
 ## 잘 되었는지 확인하기
 
