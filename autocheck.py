@@ -29,8 +29,9 @@ CHECKOUT_FROM = datetime.time(18, 0)
 SHUTDOWN_DELAY_SEC = 5
 
 MODES = {
-    "in": {"label": "입실", "button": "입실하기", "selector": "#checkIn"},
-    "out": {"label": "퇴실", "button": "퇴실하기", "selector": "#checkOut"},
+    # done: 이미 처리된 경우 버튼 대신 나타나는 요소 (입실 후 '08:46 정상출석')
+    "in": {"label": "입실", "button": "입실하기", "selector": "#checkIn", "done": "#inRoomSpan"},
+    "out": {"label": "퇴실", "button": "퇴실하기", "selector": "#checkOut", "done": None},
 }
 
 BASE = exe_dir()
@@ -128,7 +129,15 @@ def run_once(mode: dict, user: str, pw: str) -> str:
             button = page.locator(mode["selector"]).or_(
                 page.locator(".btns").get_by_text(mode["button"], exact=True)
             ).first
-            button.wait_for(state="visible", timeout=30_000)
+            deadline = time.time() + 30
+            while not button.is_visible():
+                if mode["done"] and page.locator(mode["done"]).is_visible():
+                    status = " ".join(page.locator(mode["done"]).inner_text().split())
+                    log(f"이미 {mode['label']}된 상태: {status}")
+                    return f"이미 {mode['label']}됨 ({status})"
+                if time.time() > deadline:
+                    raise RuntimeError(f"'{mode['button']}' 버튼을 찾지 못함")
+                time.sleep(0.5)
             click(button)
             log(f"'{mode['button']}' 클릭")
 
