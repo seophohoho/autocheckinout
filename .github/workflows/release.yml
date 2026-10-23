@@ -1,0 +1,42 @@
+# v로 시작하는 태그(예: v1.1.0)를 push하면 exe를 빌드해 GitHub Release에 올린다.
+# 설치된 PC의 autocheck.exe는 부팅(입실) 후 이 Release를 확인해 스스로 업데이트한다.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set version from tag
+        shell: pwsh
+        run: |
+          $v = "${{ github.ref_name }}".TrimStart("v")
+          (Get-Content common.py -Encoding utf8) -replace '^VERSION = .*', "VERSION = `"$v`"" | Set-Content common.py -Encoding utf8
+          Select-String -Path common.py -Pattern '^VERSION'
+
+      - name: Build
+        shell: pwsh
+        run: ./build.ps1
+
+      - name: Package
+        shell: pwsh
+        run: Compress-Archive -Path dist\* -DestinationPath "autocheck-${{ github.ref_name }}.zip"
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/autocheck.exe
+            autocheck-${{ github.ref_name }}.zip
+          generate_release_notes: true

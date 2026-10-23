@@ -1,8 +1,9 @@
 """SSAFY 자동 입실/퇴실. 작업 스케줄러가 실행한다.
 
-사용: autocheck.exe in|out [--force]
-  in   : 입실하기 (윈도우 로그인 시)
+사용: autocheck.exe in|out|update [--force]
+  in   : 입실하기 (윈도우 로그인 시), 끝나면 새 버전 확인/업데이트
   out  : 퇴실하기 (평일 18:00), 성공하면 5초 뒤 PC 종료
+  update : 새 버전 확인/업데이트만
   --force : 오늘 이미 성공했어도 다시 실행
   --no-shutdown : 퇴실 후 PC를 끄지 않음
 """
@@ -18,7 +19,8 @@ from playwright.sync_api import Error as PWError
 from playwright.sync_api import TimeoutError as PWTimeout
 from playwright.sync_api import sync_playwright
 
-from common import exe_dir
+import updater
+from common import VERSION, exe_dir
 
 LOGIN_URL = "https://edu.ssafy.com/comm/login/SecurityLoginForm.do"
 NETWORK_WAIT_SEC = 300  # 부팅 직후 네트워크가 잡힐 때까지 최대 대기
@@ -145,12 +147,7 @@ def run_once(mode: dict, user: str, pw: str) -> str:
             browser.close()
 
 
-def main() -> int:
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    if not args or args[0] not in MODES:
-        log(f"잘못된 인자: {sys.argv[1:]} (사용: autocheck.exe in|out)")
-        return 2
-    key = args[0]
+def run_mode(key: str) -> int:
     mode = MODES[key]
     label = mode["label"]
 
@@ -198,6 +195,33 @@ def main() -> int:
 
     alert(f"자동 {label}에 실패했습니다. 직접 {label}해 주세요.\n\n로그: {LOG_FILE}")
     return 1
+
+
+def update() -> None:
+    try:
+        updater.self_update(log)
+    except Exception as e:
+        log(f"업데이트 실패 (다음 부팅 때 다시 시도): {e!r}")
+
+
+def main() -> int:
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    if not args or args[0] not in (*MODES, "update"):
+        log(f"잘못된 인자: {sys.argv[1:]} (사용: autocheck.exe in|out|update)")
+        return 2
+    key = args[0]
+    updater.cleanup()
+    log(f"autocheck v{VERSION} 실행: {key}")
+
+    if key == "update":
+        update()
+        return 0
+
+    rc = run_mode(key)
+    if key == "in":
+        # 입실을 먼저 끝낸 뒤 업데이트한다 (새 버전은 다음 실행부터 적용)
+        update()
+    return rc
 
 
 if __name__ == "__main__":

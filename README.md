@@ -13,26 +13,36 @@
 - 하루에 한 번만 처리합니다. 같은 날 재부팅해도 다시 입실하지 않습니다.
 - 부팅 직후 인터넷이 아직 안 잡혔으면 최대 5분까지 기다리고, 실패하면 최대 3번까지 다시 시도합니다.
 - 끝내 실패하면 **"직접 입실(퇴실)해 주세요"** 경고창을 띄웁니다.
+- 입실이 끝나면 **새 버전이 있는지 확인해서 스스로 업데이트**합니다. ([자동 업데이트](#자동-업데이트) 참고)
 
 ## 준비물
 
 - Windows 10 / 11
 - **Google Chrome** 설치 (PC에 설치된 Chrome을 사용합니다)
-- **Python 3.10 이상** — 실행 파일을 만들 때만 필요합니다. 이미 만들어진 `dist` 폴더를 받았다면 필요 없습니다.
+- **Python 3.10 이상** — 직접 빌드할 때만 필요합니다. Releases에서 받으면 필요 없습니다.
 
 ## 사용 순서 한눈에 보기
 
 ```
-1. 실행 파일 만들기  (저장소를 처음 받았을 때 한 번)  →  dist 폴더 생성
-2. 설치하기          (자리마다)                       →  dist\install.exe
-3. 삭제하기          (자리를 옮기기 전)               →  dist\uninstall.exe
+1. 실행 파일 준비  (처음 한 번)          →  Releases에서 zip 받기  또는  직접 빌드
+2. 설치하기        (자리마다)            →  install.exe
+3. 삭제하기        (자리를 옮기기 전)    →  uninstall.exe
 ```
 
-## 1. 실행 파일 만들기 (처음 한 번)
+## 1. 실행 파일 준비 (처음 한 번)
+
+### 방법 A. Releases에서 받기 (권장)
+
+1. [Releases 페이지](https://github.com/seophohoho/autocheckinout/releases/latest)에서 `autocheck-vX.Y.Z.zip`을 받습니다.
+2. 압축을 풉니다. 이 폴더가 아래 설명의 `dist` 폴더입니다.
+3. [2. 설치하기](#2-설치하기)로 넘어갑니다.
+
+### 방법 B. 직접 빌드하기
 
 저장소에는 소스 코드만 있고 exe 파일(`dist` 폴더)은 없습니다. 아래 순서로 직접 만듭니다.
+직접 빌드한 exe는 버전이 `0.0.0`이라, Release가 있으면 첫 부팅 때 최신 Release 버전으로 자동 업데이트됩니다.
 
-### 1-1. Python 설치 (이미 있으면 건너뛰기)
+#### B-1. Python 설치 (이미 있으면 건너뛰기)
 
 1. https://www.python.org/downloads/ 에서 Python을 받아 설치합니다.
 2. 설치 첫 화면에서 **"Add python.exe to PATH"를 반드시 체크**합니다.
@@ -42,16 +52,16 @@
    ```
    `Python 3.12.x`처럼 나오면 성공입니다.
 
-### 1-2. 저장소 받기
+#### B-2. 저장소 받기
 
 ```
-git clone <이 저장소 주소>
-cd autocheck-in-out
+git clone https://github.com/seophohoho/autocheckinout.git
+cd autocheckinout
 ```
 
 git이 없다면 GitHub에서 **Code → Download ZIP**으로 받아 압축을 풀어도 됩니다.
 
-### 1-3. 빌드
+#### B-3. 빌드
 
 저장소 폴더의 **`build.bat`를 더블클릭**합니다. 명령 프롬프트에서 실행하려면 아래처럼 입력합니다.
 
@@ -127,6 +137,20 @@ build.bat
 - 18시에 PC가 절전 상태면 깨워서 실행합니다. 로그아웃했거나 전원이 꺼져 있으면 실행되지 않습니다.
 - PC를 껐다가 다음 날 아침에 켜도, 밀린 퇴실 작업이 실행되지 않도록 **평일 18:00 이후에만** 퇴실합니다.
 
+## 자동 업데이트
+
+PC를 켜서 **입실이 끝나면**, [GitHub Releases](https://github.com/seophohoho/autocheckinout/releases)에 새 버전이 있는지 확인합니다.
+
+```
+부팅 → 입실 처리 → 최신 Release 확인 → 새 버전이면 autocheck.exe 다운로드·교체 → 다음 실행부터 새 버전
+```
+
+- 입실을 먼저 처리하므로 업데이트 때문에 입실이 늦어지지 않습니다.
+- 업데이트에 실패해도(인터넷 문제 등) 입실/퇴실에는 영향이 없고, 다음 부팅 때 다시 시도합니다.
+- 업데이트되는 것은 `autocheck.exe`뿐입니다. 계정 정보(`.env`)와 작업 스케줄러 설정은 그대로 유지됩니다.
+- 지금 바로 업데이트를 확인하려면 `autocheck.exe update`를 실행하세요. ([직접 실행하기](#직접-실행하기-테스트용) 참고)
+- 현재 버전과 업데이트 기록은 `autocheck.log`에서 볼 수 있습니다. (`autocheck v1.0.0 실행: in`, `업데이트 완료: v1.1.0`)
+
 ## 잘 되었는지 확인하기
 
 설치 폴더: `%LOCALAPPDATA%\SsafyAutoCheckin`
@@ -151,7 +175,8 @@ build.bat
 | 공휴일 | 공휴일은 구분하지 못합니다. 평일 공휴일에 PC가 켜져 있으면 18시에 퇴실을 시도합니다. |
 | 경고창이 떴다 | 사이트에서 직접 입실/퇴실한 뒤, `autocheck.log`와 `error_*.png`를 확인하세요. |
 | 사이트 화면이 바뀌어서 동작하지 않는다 | 버튼 위치가 바뀌었을 수 있습니다. 아래 "코드 수정하기"를 참고하세요. |
-| 코드를 고쳤다 / 새 버전을 받았다 | `build.bat`로 다시 빌드한 뒤 `install.exe`를 다시 실행하세요. |
+| 새 버전이 나왔다 | 다음 부팅 때 자동으로 업데이트됩니다. 바로 받으려면 `autocheck.exe update`를 실행하세요. |
+| 직접 코드를 고쳤다 | `build.bat`로 다시 빌드한 뒤 `install.exe`를 다시 실행하세요. |
 
 ### 직접 실행하기 (테스트용)
 
@@ -163,12 +188,14 @@ autocheck.exe in                         입실
 autocheck.exe out                        퇴실 (평일 18시 이후에만, 성공 시 PC 종료)
 autocheck.exe in --force                 오늘 이미 성공했어도 다시 실행
 autocheck.exe out --force --no-shutdown  퇴실하되 PC는 끄지 않음
+autocheck.exe update                     새 버전 확인/업데이트만
 ```
 
 ## 보안 안내
 
 - 계정 정보는 `%LOCALAPPDATA%\SsafyAutoCheckin\.env`에 **평문**으로 저장됩니다. 해당 윈도우 계정으로 로그인한 사람은 누구나 볼 수 있습니다.
 - 공용 PC이거나 자리를 떠날 때는 반드시 `uninstall.exe`를 실행하세요.
+- 자동 업데이트는 이 저장소의 Release를 그대로 받아 실행합니다. **저장소에 태그를 push할 수 있는 사람이 곧 모든 설치 PC에서 실행될 코드를 정할 수 있다**는 뜻이므로, 저장소 쓰기 권한을 함부로 주지 마세요.
 
 ---
 
@@ -178,13 +205,32 @@ Python + [Playwright](https://playwright.dev/python/)(설치된 Chrome 사용) +
 
 | 파일 | 설명 |
 |---|---|
-| `autocheck.py` | 입실/퇴실 자동화 (`in` / `out`) |
+| `autocheck.py` | 입실/퇴실 자동화 (`in` / `out` / `update`) |
+| `updater.py` | GitHub Releases에서 새 `autocheck.exe`를 받아 자기 자신을 교체 |
 | `install.py` | 설치, 작업 스케줄러 등록 |
 | `uninstall.py` | 제거 |
-| `common.py` | 공통 설정 (설치 경로, 작업 이름) |
+| `common.py` | 공통 설정 (버전, 저장소, 설치 경로, 작업 이름) |
 | `requirements.txt` | 필요한 패키지 (버전 고정) |
 | `build.ps1` | 가상환경 준비 + exe 3개를 `dist\`에 빌드 |
 | `build.bat` | `build.ps1`을 더블클릭으로 실행하기 위한 파일 |
+| `.github/workflows/release.yml` | 태그 push 시 exe를 빌드해 GitHub Release에 올림 |
+
+### 새 버전 배포하기
+
+코드를 고쳐 `main`에 push한 뒤, **`v`로 시작하는 태그**를 push하면 됩니다.
+
+```
+git tag v1.1.0
+git push origin v1.1.0
+```
+
+1. GitHub Actions가 Windows에서 exe를 빌드합니다. 이때 `common.py`의 `VERSION`에 태그 버전(`1.1.0`)을 넣습니다.
+2. [Releases](https://github.com/seophohoho/autocheckinout/releases)에 `autocheck.exe`와 `autocheck-v1.1.0.zip`이 올라갑니다. 진행 상황은 저장소의 **Actions** 탭에서 볼 수 있습니다.
+3. 설치된 PC들은 다음 부팅 때 자동으로 새 버전을 받습니다.
+
+버전은 항상 이전보다 크게 올리세요. (`1.0.0` → `1.0.1` → `1.1.0`, 숫자로 비교합니다)
+
+> 자동 업데이트는 `autocheck.exe`만 교체합니다. `install.py`의 작업 스케줄러 설정(실행 시각 등)을 바꿨다면, 각 PC에서 새 버전의 `install.exe`를 다시 실행해야 적용됩니다.
 
 빌드하지 않고 소스로 바로 테스트하려면 다음처럼 실행합니다. 저장소 폴더에 `.env`가 있어야 합니다.
 

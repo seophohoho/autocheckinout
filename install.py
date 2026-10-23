@@ -13,7 +13,7 @@ from xml.sax.saxutils import escape
 
 from dotenv import dotenv_values
 
-from common import APP_DIR, APP_EXE, TASKS, exe_dir
+from common import APP_DIR, APP_EXE, TASKS, VERSION, exe_dir
 
 TASK_XML = """<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
@@ -120,7 +120,7 @@ def main() -> None:
     (APP_DIR / ".env").write_text(f"USERNAME={q(user)}\nPASSWORD={q(pw)}\n", encoding="utf-8")
     for f in APP_DIR.glob("last_success_*.txt"):
         f.unlink()
-    print(f"- 설치 위치: {APP_DIR}")
+    print(f"- 설치 위치: {APP_DIR} (v{VERSION}, 새 버전은 부팅 시 자동 업데이트)")
 
     register_task(TASKS["in"], "SSAFY 자동 입실 (로그인 시)", LOGON_TRIGGER, "in", wake=False)
     print(f"- 입실 작업 등록: '{TASKS['in']}' (윈도우 로그인 30초 후)")
