@@ -14,9 +14,58 @@
 - 부팅 직후 인터넷이 아직 안 잡혔으면 최대 5분까지 기다리고, 실패하면 최대 3번까지 다시 시도합니다.
 - 끝내 실패하면 **"직접 입실(퇴실)해 주세요"** 경고창을 띄웁니다.
 
-## 구성 파일
+## 준비물
 
-`dist` 폴더에 들어 있는 파일입니다. 이 폴더만 있으면 어느 PC에서든 설치할 수 있습니다.
+- Windows 10 / 11
+- **Google Chrome** 설치 (PC에 설치된 Chrome을 사용합니다)
+- **Python 3.10 이상** — 실행 파일을 만들 때만 필요합니다. 이미 만들어진 `dist` 폴더를 받았다면 필요 없습니다.
+
+## 사용 순서 한눈에 보기
+
+```
+1. 실행 파일 만들기  (저장소를 처음 받았을 때 한 번)  →  dist 폴더 생성
+2. 설치하기          (자리마다)                       →  dist\install.exe
+3. 삭제하기          (자리를 옮기기 전)               →  dist\uninstall.exe
+```
+
+## 1. 실행 파일 만들기 (처음 한 번)
+
+저장소에는 소스 코드만 있고 exe 파일(`dist` 폴더)은 없습니다. 아래 순서로 직접 만듭니다.
+
+### 1-1. Python 설치 (이미 있으면 건너뛰기)
+
+1. https://www.python.org/downloads/ 에서 Python을 받아 설치합니다.
+2. 설치 첫 화면에서 **"Add python.exe to PATH"를 반드시 체크**합니다.
+3. 설치가 끝나면 명령 프롬프트(`Win + R` → `cmd`)에서 확인합니다.
+   ```
+   python --version
+   ```
+   `Python 3.12.x`처럼 나오면 성공입니다.
+
+### 1-2. 저장소 받기
+
+```
+git clone <이 저장소 주소>
+cd autocheck-in-out
+```
+
+git이 없다면 GitHub에서 **Code → Download ZIP**으로 받아 압축을 풀어도 됩니다.
+
+### 1-3. 빌드
+
+저장소 폴더의 **`build.bat`를 더블클릭**합니다. 명령 프롬프트에서 실행하려면 아래처럼 입력합니다.
+
+```
+build.bat
+```
+
+처음 실행하면 다음 일을 자동으로 합니다. 약 1~3분 걸립니다.
+
+1. `.venv` 가상환경 생성
+2. 필요한 패키지 설치 (`requirements.txt`)
+3. exe 3개 빌드
+
+`Build done: ...\dist`가 나오면 성공입니다. `dist` 폴더가 생기고 그 안에 아래 파일들이 들어 있습니다.
 
 | 파일 | 설명 |
 |---|---|
@@ -24,15 +73,21 @@
 | `uninstall.exe` | 제거 프로그램. 작업 스케줄러 작업과 설치 폴더(계정 정보 포함)를 삭제합니다. |
 | `autocheck.exe` | 실제로 입실/퇴실을 하는 프로그램. 설치하면 작업 스케줄러가 알아서 실행합니다. |
 | `.env.example` | 계정 정보 파일 예시 (선택 사항) |
+| `README.md` | 이 문서 |
 
-## 준비물
+이 `dist` 폴더만 있으면 **Python이 없는 PC에서도** 설치할 수 있습니다. 자리를 옮길 때는 `dist` 폴더만 챙기면 됩니다.
 
-- Windows 10 / 11
-- **Google Chrome** 설치 (PC에 설치된 Chrome을 사용합니다)
+**빌드가 안 될 때**
 
-## 설치 방법
+| 메시지 | 해결 방법 |
+|---|---|
+| `Python not found` | Python을 설치하고 "Add python.exe to PATH"를 체크했는지 확인하세요. 설치 후에는 명령 프롬프트를 새로 여세요. |
+| `pip install failed` | 인터넷 연결을 확인하세요. 회사/교육장 네트워크에서 막혔다면 다른 네트워크에서 시도하세요. |
+| 백신이 exe를 삭제함 | PyInstaller로 만든 exe를 오진하는 경우가 있습니다. `dist` 폴더를 백신 예외로 등록하세요. |
 
-1. `dist` 폴더를 PC의 아무 곳에나 복사합니다. (예: 바탕화면)
+## 2. 설치하기
+
+1. `dist` 폴더를 PC의 아무 곳에나 둡니다. (예: 바탕화면)
 2. `install.exe`를 더블클릭합니다.
 3. SSAFY 아이디(이메일)와 비밀번호를 입력합니다. 비밀번호는 입력해도 화면에 보이지 않는 것이 정상입니다.
 4. `지금 바로 입실을 한 번 실행해 볼까요? (y/N)`
@@ -49,7 +104,7 @@
 
 > **"Windows의 PC 보호" 파란 창이 뜨면**: 서명되지 않은 exe라서 뜨는 경고입니다. **추가 정보 → 실행**을 누르세요.
 
-## 삭제 방법 (자리 이동 전 필수)
+## 3. 삭제하기 (자리 이동 전 필수)
 
 1. `uninstall.exe`를 더블클릭합니다.
 2. 작업 스케줄러 작업 2개와 설치 폴더(저장된 계정 정보, 로그 포함)가 삭제됩니다.
@@ -95,7 +150,8 @@
 | 오늘만 퇴실/종료를 안 하고 싶다 | 미리 직접 퇴실하거나, 작업 스케줄러에서 `SSAFY_AutoCheckout` 우클릭 → **사용 안 함** (다음 날 다시 **사용**으로) |
 | 공휴일 | 공휴일은 구분하지 못합니다. 평일 공휴일에 PC가 켜져 있으면 18시에 퇴실을 시도합니다. |
 | 경고창이 떴다 | 사이트에서 직접 입실/퇴실한 뒤, `autocheck.log`와 `error_*.png`를 확인하세요. |
-| 사이트 화면이 바뀌어서 동작하지 않는다 | 버튼 위치가 바뀌었을 수 있습니다. 아래 "직접 수정/빌드"를 참고하세요. |
+| 사이트 화면이 바뀌어서 동작하지 않는다 | 버튼 위치가 바뀌었을 수 있습니다. 아래 "코드 수정하기"를 참고하세요. |
+| 코드를 고쳤다 / 새 버전을 받았다 | `build.bat`로 다시 빌드한 뒤 `install.exe`를 다시 실행하세요. |
 
 ### 직접 실행하기 (테스트용)
 
@@ -116,9 +172,9 @@ autocheck.exe out --force --no-shutdown  퇴실하되 PC는 끄지 않음
 
 ---
 
-## 직접 수정 / 빌드 (개발자용)
+## 코드 수정하기 (개발자용)
 
-Python 3.12 + [Playwright](https://playwright.dev/python/)(설치된 Chrome 사용) + PyInstaller로 만들었습니다.
+Python + [Playwright](https://playwright.dev/python/)(설치된 Chrome 사용) + PyInstaller로 만들었습니다.
 
 | 파일 | 설명 |
 |---|---|
@@ -126,12 +182,14 @@ Python 3.12 + [Playwright](https://playwright.dev/python/)(설치된 Chrome 사�
 | `install.py` | 설치, 작업 스케줄러 등록 |
 | `uninstall.py` | 제거 |
 | `common.py` | 공통 설정 (설치 경로, 작업 이름) |
-| `build.ps1` | exe 3개를 `dist\`에 빌드 |
+| `requirements.txt` | 필요한 패키지 (버전 고정) |
+| `build.ps1` | 가상환경 준비 + exe 3개를 `dist\`에 빌드 |
+| `build.bat` | `build.ps1`을 더블클릭으로 실행하기 위한 파일 |
+
+빌드하지 않고 소스로 바로 테스트하려면 다음처럼 실행합니다. 저장소 폴더에 `.env`가 있어야 합니다.
 
 ```
-python -m venv .venv
-.venv\Scripts\python.exe -m pip install playwright python-dotenv pyinstaller
-powershell -ExecutionPolicy Bypass -File build.ps1
+.venv\Scripts\python.exe autocheck.py in --force
 ```
 
 사이트의 버튼 위치가 바뀌면 `autocheck.py`의 selector를 고친 뒤 다시 빌드하세요.
